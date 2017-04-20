@@ -7,7 +7,11 @@ var currentState,
     theHero,
     theGround,
     theCrystal,
-    theCrystal02;
+    theCrystal02,
+    theFireBall,
+    theFireBall02,
+    points = 0;
+
 
 var states = {
     splash: 0,
@@ -15,9 +19,49 @@ var states = {
     score: 2
 };
 
-function Crystal(){
+function Fireball(){
+    this.x = (width / 2) + Math.floor(Math.random() * 200) + 300;
+    this.y = 0;
 
-    this.x = width;
+    this.frame = 0;
+    this.annimation = [0, 1, 2, 3];
+
+    this.update = function (){
+        var h = 12; //every 10 browser frames = 1 hero frame
+        this.frame += frames % h === 0 ? 1 : 0;
+        this.frame %= this.annimation.length;
+    };
+
+    var ranHeight = 75;
+    var ranWaveHeight = 30;
+    var ranXOffset = Math.floor(Math.random() * 25);
+
+    this.draw = function (renderingContext){ //rendering context is the canvas
+        renderingContext.save();
+        renderingContext.translate(this.x, this.y);
+
+        var h = this.annimation[this.frame];
+        fireBall[h].draw(renderingContext, this.x, this.y);
+
+        renderingContext.restore();
+
+
+        if (this.x <= -26){
+            ranHeight = Math.floor(Math.random() * 140);
+            ranWaveHeight = Math.floor(Math.random() * 50) + 20;
+            ranXOffset = Math.floor(Math.random() * 300);
+            this.x = (width / 2) + ranXOffset;
+            this.y = ranHeight;
+            this.annimation = [0, 1, 2, 3];
+        } else{
+            this.x--;
+            this.y = ranHeight + ( ranWaveHeight * Math.cos(frames / 15) );
+        }
+    }
+}
+
+function Crystal(){
+    this.x = width - 100;
     this.y = 75;
 
     this.frame = 0;
@@ -40,12 +84,12 @@ function Crystal(){
 
         if (this.x <= -26){
             var ranHeight = Math.floor(Math.random() * 150);
-            this.x = width;
+            this.x = width / 2;
             this.y = ranHeight;
+            this.annimation = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
         } else{
             this.x--;
         }
-        console.log("x: " + this.x + "  y: " + this.y);
     }
 }
 function Crystal02(){
@@ -76,10 +120,10 @@ function Crystal02(){
             var ranDistance = Math.floor(Math.random() * 250);
             this.x = width + ranDistance;
             this.y = ranHeight;
+            this.annimation = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ];
         } else{
             this.x--;
         }
-        console.log("x: " + this.x + "  y: " + this.y);
     }
 }
 
@@ -144,13 +188,16 @@ function Hero(){
         this.y = 180;
     };
 
-    this.updatePlayingHero = function (){
+    this.updatePlayingHero = function () {
         this.velocity += this.gravity;
         this.y += this.velocity;
 
-        if(this.y >= 180){ //check to see if hit the ground and stay there
+        if (this.y >= 180) { //check to see if hit the ground and stay there
             this.y = 180;
             this.velocity = this._jump;
+            this.annimation = this.annimation = [0, 1, 2, 1];
+            this._jump = 4.6;
+
         }
     };
 
@@ -192,6 +239,8 @@ function main(){
     theGround = new Ground;
     theCrystal = new Crystal();
     theCrystal02 = new Crystal02();
+    theFireBall = new Fireball();
+    theFireBall02 = new Fireball();
 }
 
 function loadGraphics() {
@@ -205,11 +254,15 @@ function loadGraphics() {
     //Crystals
     var crystalImg = new Image();
     crystalImg.src = "img/greenCrystal.png";
+    //FireBalls
+    var fireBallImg = new Image();
+    fireBallImg.src = "img/fireBall.png";
 
     linkImg.onload = function () {
         initLink(this);
         initGround(groundImg);
         initCrystal(crystalImg);
+        initFireBall(fireBallImg);
         renderingContext.fillStyle = "#8BE4DF";
         //link.draw(renderingContext, 50, 50);
         gameLoop();
@@ -217,10 +270,55 @@ function loadGraphics() {
 
 }
 
+function crystalCollisionCheck(){
+    var crystalCenter = [theCrystal.x + 14, theCrystal.y + 24 ];
+    var crystalCenter02 = [theCrystal02.x + 14, theCrystal02.y + 24];
+    var linkCenter = [theHero.x + 22, theHero.y + 26];
+    var collisionDistance = 15;
+    var crystalLinkDiff = [Math.abs(crystalCenter[0] - linkCenter[0]), Math.abs(crystalCenter[1] - linkCenter[1])];
+    var crystal02LinkDiff = [Math.abs(crystalCenter02[0] - linkCenter[0]), Math.abs(crystalCenter02[1] - linkCenter[1])];
+    if (crystalLinkDiff[0] < collisionDistance && crystalLinkDiff[1] < collisionDistance){
+        console.log("Hit!");
+        if(theCrystal.annimation.length > 1){points++; updatePoints();}
+        theCrystal.annimation = [12];
+        updatePoints();
+
+    }
+    if (crystal02LinkDiff[0] < collisionDistance && crystal02LinkDiff[1] < collisionDistance){
+        console.log("Hit!");
+        if(theCrystal02.annimation.length > 1){points++; updatePoints();}
+        theCrystal02.annimation = [12];
+
+    }
+}
+function fireballCollisionCheck(){
+    var fireBallCenter = [theFireBall.x + 19, theFireBall.y + 21 ];
+    var fireBallCenter02 = [theFireBall02.x + 19, theFireBall02.y + 21];
+    var linkCenter = [theHero.x + 22, theHero.y + 26];
+    var collisionDistance = 15;
+    var fireBallLinkDiff = [Math.abs(fireBallCenter[0] - linkCenter[0]), Math.abs(fireBallCenter[1] - linkCenter[1])];
+    var fireBall02LinkDiff = [Math.abs(fireBallCenter02[0] - linkCenter[0]), Math.abs(fireBallCenter02[1] - linkCenter[1])];
+    if (fireBallLinkDiff[0] < collisionDistance && fireBallLinkDiff[1] < collisionDistance){
+        console.log("Hit!");
+        theHero.annimation = [3];
+        theHero._jump = 7;
+        theHero.jump();
+        theHero._jump = 0;
+    }
+    if (fireBall02LinkDiff[0] < collisionDistance && fireBall02LinkDiff[1] < collisionDistance){
+        console.log("Hit!");
+        theHero.annimation = [3];
+        theHero._jump = 7;
+        theHero.jump();
+        theHero._jump = 0;
+    }
+}
 
 function gameLoop(){
     update();
     render();
+    crystalCollisionCheck();
+    fireballCollisionCheck();
     window.requestAnimationFrame(gameLoop);
 }
 function update(){
@@ -229,6 +327,8 @@ function update(){
     theGround.update();
     theCrystal.update();
     theCrystal02.update();
+    theFireBall.update();
+    theFireBall02.update();
 
 }
 function render(){
@@ -237,6 +337,8 @@ function render(){
     theGround.draw(renderingContext);
     theCrystal.draw(renderingContext);
     theCrystal02.draw(renderingContext);
+    theFireBall.draw(renderingContext);
+    theFireBall02.draw(renderingContext);
 }
 
 function windowSetup() {
@@ -262,5 +364,11 @@ function canvasSetup(){
     canvas.height = height;
     renderingContext = canvas.getContext("2d");
 }
+
+function updatePoints(){
+    $("#points").replaceWith("<div class='item' id='points'><h2 id = 'points'>"+points+"</h2></div>");
+    $("#points").addClass("highlight");
+}
+
 
 

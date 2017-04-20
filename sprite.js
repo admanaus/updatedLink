@@ -1,6 +1,7 @@
 var link;
 var ground;
 var crystal;
+var fireBall;
 
 function Sprite(img, x, y, width, height) {
     this.img = img;
@@ -19,7 +20,8 @@ function initLink(img) {
     link = [
         new Sprite(img, 0, 0, 45, 55),
         new Sprite(img, 45, 0, 45, 55),
-        new Sprite(img, 90, 0, 45, 55)
+        new Sprite(img, 90, 0, 45, 55),
+        new Sprite(img, 135, 0, 45, 55)
     ];
 
 }
@@ -42,7 +44,20 @@ function initCrystal(img) {
         new Sprite(img, 228, 0, 27, 45),
         new Sprite(img, 258, 0, 27, 45),
         new Sprite(img, 287, 0, 27, 45),
-        new Sprite(img, 315, 0, 27, 45)
+        new Sprite(img, 315, 0, 27, 45), //this is the last crystal frame
+        new Sprite(img, 1, 0, 2, 2)
+
+
+    ];
+}
+
+function initFireBall(img) {
+    fireBall = [
+        new Sprite(img, 1, 0, 39, 42),
+        new Sprite(img, 52, 0, 39, 42),
+        new Sprite(img, 103, 0, 39, 42),
+        new Sprite(img, 154, 0, 39, 42), //this is the last fireBall frame
+        new Sprite(img, 1, 0, 2, 2)
 
 
     ];
