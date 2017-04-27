@@ -10,7 +10,9 @@ var currentState,
     theCrystal02,
     theFireBall,
     theFireBall02,
-    points = 0,
+    points = 1,
+    level = 1,
+    life = 3,
     highScore = 1;
 
 
@@ -55,16 +57,18 @@ function Fireball(){
             this.y = ranHeight;
             this.annimation = [0, 1, 2, 3];
         } else{
-            this.x--;
+            this.x -= (1 + (level / 3));
             this.y = ranHeight + ( ranWaveHeight * Math.cos(frames / 15) );
         }
     }
 }
 
 function Crystal(){
-    this.x = width - 100;
-    this.y = 75;
+    var speed = (Math.random() * 3) + 0.5;
+    var height = (Math.random() * 150) + 75;
 
+    this.x = width - 100;
+    this.y = height;
     this.frame = 0;
     this.annimation = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
@@ -84,44 +88,13 @@ function Crystal(){
         renderingContext.restore();
         if (this.x <= -26){
             var ranHeight = Math.floor(Math.random() * 150);
+            speed = (Math.random() * 3) + (level);
             this.x = width / 2;
             this.y = ranHeight;
             this.annimation = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
         } else{
-            this.x-= 2
-        }
-    }
-}
-function Crystal02(){
-
-    this.x = width + 50;
-    this.y = 50;
-
-    this.frame = 0;
-    this.annimation = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-
-    this.update = function (){
-        var h = 20; //every 10 browser frames = 1 hero frame
-        this.frame += frames % h === 0 ? 1 : 0;
-        this.frame %= this.annimation.length;
-    };
-
-    this.draw = function (renderingContext){ //rendering context is the canvas
-        renderingContext.save();
-        renderingContext.translate(this.x, this.y);
-
-        var h = this.annimation[this.frame];
-        crystal[h].draw(renderingContext, this.x, this.y);
-
-        renderingContext.restore();
-        if (this.x <= -26){
-            var ranHeight = Math.floor(Math.random() * 150);
-            var ranDistance = Math.floor(Math.random() * 250);
-            this.x = width + ranDistance;
-            this.y = ranHeight;
-            this.annimation = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ];
-        } else{
-            this.x-= 1.5;
+            this.x-= speed;
         }
     }
 }
@@ -150,7 +123,7 @@ function Ground(){
         ground[h].draw(renderingContext, this.x + 256, this.y ); //256 is the length of the ground image
         ground[h].draw(renderingContext, this.x + (256 * 2), this.y );
         renderingContext.restore();
-        this.x <= -31 ? this.x = 0 : this.x--;
+        this.x <= -31 ? this.x = 0 : this.x -= (1 + (level/5));
     }
 }
 function Hero(){
@@ -236,7 +209,7 @@ function main(){
     theHero = new Hero;
     theGround = new Ground;
     theCrystal = new Crystal();
-    theCrystal02 = new Crystal02();
+    theCrystal02 = new Crystal();
     theFireBall = new Fireball();
     theFireBall02 = new Fireball();
 }
@@ -277,16 +250,18 @@ function crystalCollisionCheck(){
     var crystal02LinkDiff = [Math.abs(crystalCenter02[0] - linkCenter[0]), Math.abs(crystalCenter02[1] - linkCenter[1])];
     if (crystalLinkDiff[0] < collisionDistance && crystalLinkDiff[1] < collisionDistance){
 
-        if(theCrystal.annimation.length > 1){points++; updatePoints();}
+        if(theCrystal.annimation.length > 1){points++; life += 2; updatePoints();}
         theCrystal.annimation = [12];
+
         updatePoints();
 
     }
     if (crystal02LinkDiff[0] < collisionDistance && crystal02LinkDiff[1] < collisionDistance){
 
-        if(theCrystal02.annimation.length > 1){points++; updatePoints();}
+        if(theCrystal02.annimation.length > 1){points++; life+=2; updatePoints();}
         theCrystal02.annimation = [12];
 
+        updatePoints();
     }
 }
 function fireballCollisionCheck(){
@@ -298,17 +273,21 @@ function fireballCollisionCheck(){
     var fireBall02LinkDiff = [Math.abs(fireBallCenter02[0] - linkCenter[0]), Math.abs(fireBallCenter02[1] - linkCenter[1])];
     if (fireBallLinkDiff[0] < collisionDistance && fireBallLinkDiff[1] < collisionDistance){
 
+        life -= 1;
         theHero.annimation = [3];
         theHero._jump = 7;
         theHero.jump();
         theHero._jump = 0;
+        updatePoints();
     }
     if (fireBall02LinkDiff[0] < collisionDistance && fireBall02LinkDiff[1] < collisionDistance){
 
+        life -= 1;
         theHero.annimation = [3];
         theHero._jump = 7;
         theHero.jump();
         theHero._jump = 0;
+        updatePoints();
     }
 }
 
@@ -317,7 +296,17 @@ function gameLoop(){
     render();
     crystalCollisionCheck();
     fireballCollisionCheck();
+    level = Math.ceil(points / 10);
+    checkLife();
+
     window.requestAnimationFrame(gameLoop);
+}
+
+function checkLife(){
+    if (life < 1) {
+        $("#gameCanvas").hide();
+        $("#wrapper").replaceWith("<div class='container' id='wrapper'><img src='img/died.gif'></div>");
+    }
 }
 function update(){
     frames++;
@@ -357,7 +346,7 @@ function windowSetup() {
 }
 
 function canvasSetup(){
-    canvas = document.createElement("canvas");
+    canvas = document.getElementById("gameCanvas");
     canvas.style.border = "1px solid black";
     canvas.width = width;
     canvas.height = height;
@@ -369,6 +358,10 @@ function canvasSetup(){
 function updatePoints(){
     $("#points").replaceWith("<div class='item' id='points'><h2 id = 'points'>"+points+"</h2></div>");
     $("#points").addClass("highlight");
+    var displayLevel = Math.ceil(level);
+    var displayLife = Math.ceil(life);
+    $("#level").replaceWith("<div class='item' id='level'><h2>"+displayLevel+"</h2></div>");
+    $("#life").replaceWith("<div class='item' id='life'><h2>"+displayLife+"</h2></div>");
     checkHighScore();
 }
 
