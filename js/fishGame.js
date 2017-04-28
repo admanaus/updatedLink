@@ -13,7 +13,7 @@ var currentState,
     theClouds,
     points = 1,
     level = 1,
-    life = 10,
+    life = 1,
     highScore = 1;
 
 
@@ -151,7 +151,7 @@ function Clouds(){
         clouds[h].draw(renderingContext, this.x + 1918, this.y ); //1918 is the length of the ground image
         clouds[h].draw(renderingContext, this.x + (1918 * 2), this.y );
         renderingContext.restore();
-        this.x <= -1918 ? this.x = 0 : this.x -= (.1 + (level/4));
+        this.x <= -1918 ? this.x = 0 : this.x -= (.05 + (level/3));
     }
 }
 function Hero(){
@@ -173,7 +173,8 @@ function Hero(){
     };
 
     this.update = function (){
-        var h = currentState === states.splash ? 12 : 8; //every 10 browser frames = 1 hero frame
+        var h = currentState === states.splash ? 12 : (10 - level); //every 10 browser frames = 1 hero frame
+        if ( h < 3 ) { h = 3;}
         this.frame += frames % h === 0 ? 1 : 0;
         this.frame %= this.annimation.length;
 
