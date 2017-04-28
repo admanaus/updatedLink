@@ -10,6 +10,7 @@ var currentState,
     theCrystal02,
     theFireBall,
     theFireBall02,
+    theClouds,
     points = 1,
     level = 1,
     life = 10,
@@ -123,7 +124,34 @@ function Ground(){
         ground[h].draw(renderingContext, this.x + 256, this.y ); //256 is the length of the ground image
         ground[h].draw(renderingContext, this.x + (256 * 2), this.y );
         renderingContext.restore();
-        this.x <= -31 ? this.x = 0 : this.x -= (1 + (level/5));
+        this.x <= -31 ? this.x = 0 : this.x -= (1 + (level/4));
+    }
+}
+function Clouds(){
+    this.x = 0;
+    this.y = 0;
+
+    this.frame = 0;
+    this.annimation = [0];
+
+    this.update = function (){
+        var h = currentState === states.splash ? 10 : 5; //every 10 browser frames = 1 hero frame
+        this.frame += frames % h === 0 ? 1 : 0;
+        this.frame %= this.annimation.length;
+    };
+
+    this.draw = function (renderingContext){ //rendering context is the canvas
+        renderingContext.save();
+
+        renderingContext.translate(this.x, this.y);
+
+        var h = this.annimation[this.frame];
+        clouds[h].draw(renderingContext, this.x, this.y);
+        //draw a second copy fo the ground image
+        clouds[h].draw(renderingContext, this.x + 1918, this.y ); //1918 is the length of the ground image
+        clouds[h].draw(renderingContext, this.x + (1918 * 2), this.y );
+        renderingContext.restore();
+        this.x <= -1918 ? this.x = 0 : this.x -= (.1 + (level/4));
     }
 }
 function Hero(){
@@ -220,6 +248,7 @@ function main(){
     document.body.appendChild(canvas);
     loadGraphics();
     theHero = new Hero;
+    theClouds = new Clouds;
     theGround = new Ground;
     theCrystal = new Crystal();
     theCrystal02 = new Crystal();
@@ -241,13 +270,17 @@ function loadGraphics() {
     //FireBalls
     var fireBallImg = new Image();
     fireBallImg.src = "img/fireBall.png";
+    //clouds
+    var cloudsImg = new Image();
+    cloudsImg.src = "img/clouds.jpg";
 
     linkImg.onload = function () {
         initLink(this);
+        initClouds(cloudsImg);
         initGround(groundImg);
         initCrystal(crystalImg);
         +        initFireBall(fireBallImg);
-        renderingContext.fillStyle = "#8BE4DF";
+        renderingContext.fillStyle = "#b0def8";
         //link.draw(renderingContext, 50, 50);
         gameLoop();
     };
@@ -338,6 +371,7 @@ function reload(){
 }
 function render(){
     renderingContext.fillRect(0, 0, width, height);
+    theClouds.draw(renderingContext);
     theHero.draw(renderingContext);
     theGround.draw(renderingContext);
     theCrystal.draw(renderingContext);
@@ -381,7 +415,8 @@ function updatePoints(){
     var displayLife = Math.ceil(life);
     if (displayLife < 0) { displayLife = 0; }
     $("#level").replaceWith("<div class='item' id='level'><h2>"+displayLevel+"</h2></div>");
-    $("#life").replaceWith("<div class='item' id='life'><h2>"+displayLife+"</h2></div>");
+    $("#life").replaceWith("<div class='item' id='life'></div>");
+    $("#life").css("border-right", life + "px solid red");
     checkHighScore();
 }
 

@@ -2,7 +2,7 @@ var link;
 var ground;
 var crystal;
 var fireBall;
-var background;
+var clouds;
 
 function Sprite(img, x, y, width, height) {
     this.img = img;
@@ -30,6 +30,12 @@ function initLink(img) {
 function initGround(img){
     ground = [
         new Sprite(img, 0, 0, 256, 32 )
+    ];
+}
+
+function initClouds(img){
+    clouds = [
+        new Sprite(img, 0, 0, 1918, 250 )
     ];
 }
 
