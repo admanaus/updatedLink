@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/custom.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 </head>
-<body onload="main()">
+<body onload="prepare()">
 
 <div class="container" id="scoreContainer">
     <div class="item"><h2>Score:</h2></div>
@@ -25,11 +25,21 @@
     <div class="item"><h2>Life: </h2></div>
     <div class="item" id="life"><h2>10</h2></div>
 </div>
+<div class="container" id="clickToPlay">
+    <div class="item" onclick="main()">
+        <img src="img/click.gif">
+    </div>
+</div>
+
 <div class="container" id="wrapper">
     <div class="item">
         <canvas id="gameCanvas"></canvas>
     </div>
-
+</div>
+<div class="container" id="playAgain">
+    <div class="item" onclick="reload()">
+        <img src="img/button-play-again.png">
+    </div>
 </div>
 
 </body>

@@ -12,7 +12,7 @@ var currentState,
     theFireBall02,
     points = 1,
     level = 1,
-    life = 3,
+    life = 10,
     highScore = 1;
 
 
@@ -65,7 +65,7 @@ function Fireball(){
 
 function Crystal(){
     var speed = (Math.random() * 3) + 0.5;
-    var height = (Math.random() * 150) + 75;
+    var height = (Math.random() * 150);
 
     this.x = width - 100;
     this.y = height;
@@ -187,6 +187,8 @@ function Hero(){
 }
 
 function onPress(evt){
+
+
     switch (currentState){
         case states.splash:
             theHero.jump();
@@ -197,12 +199,23 @@ function onPress(evt){
             theHero.jump();
             break;
 
+        case states.score:
+            theHero.jump();
+            $("#wrapper").replaceWith("<div class='container' id='wrapper'><canvas id='gameCanvas'></canvas></div>");
+            $("#gameCanvas").show();
+            level = 1;
+            points = 1;
+            currentState = states.game;
+            break;
     }
 }
 
 function main(){
+    $("#clickToPlay").remove();
     windowSetup();
     canvasSetup();
+    $("#playAgain").hide();
+
     currentState = states.splash;
     document.body.appendChild(canvas);
     loadGraphics();
@@ -273,7 +286,7 @@ function fireballCollisionCheck(){
     var fireBall02LinkDiff = [Math.abs(fireBallCenter02[0] - linkCenter[0]), Math.abs(fireBallCenter02[1] - linkCenter[1])];
     if (fireBallLinkDiff[0] < collisionDistance && fireBallLinkDiff[1] < collisionDistance){
 
-        life -= 1;
+        life -= level;
         theHero.annimation = [3];
         theHero._jump = 7;
         theHero.jump();
@@ -282,7 +295,7 @@ function fireballCollisionCheck(){
     }
     if (fireBall02LinkDiff[0] < collisionDistance && fireBall02LinkDiff[1] < collisionDistance){
 
-        life -= 1;
+        life -= level;
         theHero.annimation = [3];
         theHero._jump = 7;
         theHero.jump();
@@ -306,6 +319,7 @@ function checkLife(){
     if (life < 1) {
         $("#gameCanvas").hide();
         $("#wrapper").replaceWith("<div class='container' id='wrapper'><img src='img/died.gif'></div>");
+        $("#playAgain").show();
     }
 }
 function update(){
@@ -319,6 +333,9 @@ function update(){
     theFireBall02.update();
 
 }
+function reload(){
+    location.reload();
+}
 function render(){
     renderingContext.fillRect(0, 0, width, height);
     theHero.draw(renderingContext);
@@ -328,7 +345,6 @@ function render(){
     theFireBall.draw(renderingContext);
     theFireBall02.draw(renderingContext);
 }
-
 function windowSetup() {
     var inputEvent = "touchstart";
     var windowWidth = window.innerWidth;
@@ -344,7 +360,10 @@ function windowSetup() {
     document.addEventListener(inputEvent, onPress);
 
 }
-
+function prepare(){
+    $("#playAgain").hide();
+    getHighScore();
+}
 function canvasSetup(){
     canvas = document.getElementById("gameCanvas");
     canvas.style.border = "1px solid black";
@@ -360,6 +379,7 @@ function updatePoints(){
     $("#points").addClass("highlight");
     var displayLevel = Math.ceil(level);
     var displayLife = Math.ceil(life);
+    if (displayLife < 0) { displayLife = 0; }
     $("#level").replaceWith("<div class='item' id='level'><h2>"+displayLevel+"</h2></div>");
     $("#life").replaceWith("<div class='item' id='life'><h2>"+displayLife+"</h2></div>");
     checkHighScore();

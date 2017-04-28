@@ -6,6 +6,7 @@
 
 .item {
     padding: 15px;
+    padding-bottom: 0px;
 }
 
 @keyframes scoreHighlight {
@@ -32,11 +33,13 @@ body{
  #highScore {
      color: blue;
  }
+ #levelContainer{
+ }
 
 #gameCanvas {
     position: absolute;
-    top:0;
-    bottom: 0;
+
+
     left: 0;
     right: 0;
     margin:auto;
